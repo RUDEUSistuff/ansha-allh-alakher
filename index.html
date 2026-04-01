@@ -1,0 +1,203 @@
+here<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Smart Calculator Hub</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/10.4.3/decimal.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;padding:20px;font-family:'Segoe UI',Arial,sans-serif;background:radial-gradient(ellipse at center,#0a0f2a 0%,#03050b 100%);color:white;display:flex;justify-content:center;align-items:center;min-height:100vh;text-align:center;flex-direction:column;position:relative;overflow-x:hidden}
+.stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.star{position:absolute;background:white;border-radius:50%;animation:moveUp linear infinite}
+@keyframes moveUp{0%{transform:translateY(100vh)}100%{transform:translateY(-20vh)}}
+.container{max-width:400px;width:90%;margin:auto;position:relative;z-index:1}
+.hidden{display:none}
+button,.btn,.menu-btn{padding:14px 24px;margin:8px;border-radius:12px;color:white;background:rgba(255,182,193,0.7);cursor:pointer;transition:0.2s}
+button:hover,.btn:hover,.menu-btn:hover{transform:scale(1.05);background:rgba(255,182,193,0.9)}
+input{padding:10px;width:80%;border-radius:12px;text-align:center;margin:5px}
+.result,.explain{margin:10px}
+</style>
+</head>
+<body>
+
+<div class="stars" id="starsContainer"></div>
+<div class="container">
+
+<!-- Welcome -->
+<div id="welcome">
+<h1>AI Smart Calculator Hub</h1>
+<p>Welcome to the ultimate calculator that handles advanced Math, Physics formulas, puzzles, and 3D shapes. Click start to explore!</p>
+<button id="startBtn">Start</button>
+</div>
+
+<!-- Menu -->
+<div id="menu" class="hidden">
+<h2>Select Mode</h2>
+<button onclick="showPage('math')">Math</button>
+<button onclick="showPage('physics')">Physics</button>
+<button onclick="showPage('puzzle')">Puzzle</button>
+<button onclick="showPage('ai3d')">3D & AI</button>
+</div>
+
+<!-- Math -->
+<div id="math" class="hidden">
+<h2>Math</h2>
+<input id="mathInput" placeholder="Enter operation...">
+<div>
+<button onclick="addMath('+')">+</button>
+<button onclick="addMath('-')">-</button>
+<button onclick="addMath('*')">×</button>
+<button onclick="addMath('/')">÷</button>
+<button onclick="addMath('**')">^</button>
+<button onclick="addMath('%')">%</button>
+<button onclick="addMath('Math.sqrt(')">√</button>
+<button onclick="addMath('Math.PI')">π</button>
+<button onclick="addMath('Math.E')">e</button>
+</div>
+<div>
+<button onclick="clearMath()">Clear</button>
+<button onclick="calculateMath()">Calculate</button>
+</div>
+<div class="result-box">
+<div class="result" id="mathRes">Result: ---</div>
+<div class="explain" id="mathExplain">Explanation: ---</div>
+</div>
+<button onclick="showPage('menu')">Back</button>
+</div>
+
+<!-- Physics -->
+<div id="physics" class="hidden">
+<h2>Physics Calculator</h2>
+<select id="physicsSelect" onchange="showPhysicsFields()">
+  <option value="">Select Law</option>
+  <option value="Force">Force (F = m × a)</option>
+  <option value="Pressure">Pressure (P = F / A)</option>
+  <option value="Kinetic Energy">Kinetic Energy (KE = 1/2 m v²)</option>
+  <option value="Potential Energy">Potential Energy (PE = m g h)</option>
+</select>
+<div id="physicsInputs"></div>
+<div id="physicsResult" class="result">Result: ---</div>
+<button onclick="showPage('menu')">Back</button>
+</div>
+
+<!-- Puzzle -->
+<div id="puzzle" class="hidden">
+<h2>Puzzle Game</h2>
+<select id="puzzleLevel">
+  <option value="">Select Difficulty</option>
+  <option value="easy">Easy</option>
+  <option value="medium">Medium</option>
+  <option value="hard">Hard</option>
+</select>
+<button onclick="startPuzzle()">Start Game</button>
+<div id="puzzleQuestion">Question will appear here</div>
+<div id="puzzleOptions"></div>
+<div id="puzzleScore">Score: 0</div>
+<button onclick="showPage('menu')">Back</button>
+</div>
+
+<!-- 3D & AI -->
+<div id="ai3d" class="hidden">
+<h2>3D & AI Calculator</h2>
+<input id="aiInput" placeholder="cube 3 or sphere 5 or cone 4 or pyramid 4">
+<select id="shapeSelect">
+  <option value="volume">Volume</option>
+  <option value="surface">Surface Area</option>
+</select>
+<button onclick="solveAI()">Calculate</button>
+<div id="aiRes" class="result">Result: ---</div>
+<div id="aiExplain" class="explain">Explanation: ---</div>
+<button onclick="showPage('menu')">Back</button>
+</div>
+
+</div>
+
+<script>
+// stars animation
+for(let i=0;i<30;i++){
+  let s=document.createElement('div');
+  s.className='star';
+  s.style.width='2px';
+  s.style.height='2px';
+  s.style.left=Math.random()*100+'%';
+  s.style.animationDuration=(Math.random()*5+5)+'s';
+  document.getElementById('starsContainer').appendChild(s);
+}
+
+// navigation
+function showPage(p){
+  ['menu','math','physics','puzzle','ai3d'].forEach(id=>{
+    document.getElementById(id).classList.add('hidden');
+  });
+  document.getElementById(p).classList.remove('hidden');
+}
+
+// start button
+document.getElementById('startBtn').onclick=()=>{
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+};
+
+// math
+function addMath(val){ document.getElementById('mathInput').value += val; }
+function clearMath(){ 
+  document.getElementById('mathInput').value = ''; 
+  document.getElementById('mathRes').innerHTML="Result: ---";
+  document.getElementById('mathExplain').innerHTML="Explanation: ---";
+}
+function calculateMath(){
+  let input=document.getElementById('mathInput').value;
+  try{
+    let res=eval(input);
+    document.getElementById('mathRes').innerHTML="Result: "+res;
+    document.getElementById('mathExplain').innerHTML=input+" = "+res;
+  }catch{
+    document.getElementById('mathRes').innerHTML="Error";
+  }
+}
+
+// physics
+function showPhysicsFields(){
+  let law=document.getElementById('physicsSelect').value;
+  let html="";
+  switch(law){
+    case "Force": html='Mass (m): <input id="m" type="number"><br>Acceleration (a): <input id="a" type="number"><br><button onclick="calculatePhysics(\'Force\')">Calculate</button>'; break;
+    case "Pressure": html='Force (F): <input id="F" type="number"><br>Area (A): <input id="A" type="number"><br><button onclick="calculatePhysics(\'Pressure\')">Calculate</button>'; break;
+    case "Kinetic Energy": html='Mass (m): <input id="m" type="number"><br>Velocity (v): <input id="v" type="number"><br><button onclick="calculatePhysics(\'Kinetic Energy\')">Calculate</button>'; break;
+    case "Potential Energy": html='Mass (m): <input id="m" type="number"><br>Height (h): <input id="h" type="number"><br>Gravity (g=9.8)<br><button onclick="calculatePhysics(\'Potential Energy\')">Calculate</button>'; break;
+  }
+  document.getElementById('physicsInputs').innerHTML=html;
+}
+function calculatePhysics(law){
+  let res=0;
+  switch(law){
+    case "Force": res=parseFloat(document.getElementById('m').value)*parseFloat(document.getElementById('a').value); break;
+    case "Pressure": res=parseFloat(document.getElementById('F').value)/parseFloat(document.getElementById('A').value); break;
+    case "Kinetic Energy": res=0.5*parseFloat(document.getElementById('m').value)*Math.pow(parseFloat(document.getElementById('v').value),2); break;
+    case "Potential Energy": res=parseFloat(document.getElementById('m').value)*9.8*parseFloat(document.getElementById('h').value); break;
+  }
+  document.getElementById('physicsResult').innerHTML="Result: "+res;
+}
+
+// 3D & AI
+function solveAI(){
+  let input=document.getElementById('aiInput').value.toLowerCase();
+  let type=document.getElementById('shapeSelect').value;
+  let num=parseFloat(input.match(/\d+/));
+  if(input.includes('cube')){
+    if(type==='volume'){ document.getElementById('aiRes').innerHTML=num*num*num; document.getElementById('aiExplain').innerHTML=`Cube Volume = ${num}³`; }
+    else { document.getElementById('aiRes').innerHTML=6*num*num; document.getElementById('aiExplain').innerHTML=`Cube Surface Area = 6 × ${num}²`; }
+  } else if(input.includes('sphere')){
+    if(type==='volume'){ let v=(4/3)*Math.PI*num**3; document.getElementById('aiRes').innerHTML=v.toFixed(2); document.getElementById('aiExplain').innerHTML=`Sphere Volume = 4/3 π r³`; }
+    else { let s=4*Math.PI*num**2; document.getElementById('aiRes').innerHTML=s.toFixed(2); document.getElementById('aiExplain').innerHTML=`Sphere Surface Area = 4 π r²`; }
+  } else if(input.includes('cone')){
+    if(type==='volume'){ let v=(1/3)*Math.PI*num*num*num; document.getElementById('aiRes').innerHTML=v.toFixed(2); document.getElementById('aiExplain').innerHTML=`Cone Volume = 1/3 π r² h (assuming r=h)`; }
+    else { let s=Math.PI*num*(num+Math.sqrt(num*num+num*num)); document.getElementById('aiRes').innerHTML=s.toFixed(2); document.getElementById('aiExplain').innerHTML=`Cone Surface Area`; }
+  } else if(input.includes('pyramid')){
+    if(type==='volume'){ let v=num*num*num/3; document.getElementById('aiRes').innerHTML=v; document.getElementById('aiExplain').innerHTML=`Pyramid Volume = base² × h /3 (assuming h=base)`; }
+    else { let s=num*num+2*num*Math.sqrt(num*num+num*num); document.getElementById('aiRes').innerHTML=s; document.getElementById('aiExplain').innerHTML=`Pyramid Surface Area`; }
+  } else { document.getElementById('aiRes').innerHTML="Error"; document.getElementById('aiExplain').innerHTML="Try: cube 3"; }
+}
+</script>
+</body>
+</html>
